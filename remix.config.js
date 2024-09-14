@@ -1,0 +1,31 @@
+/** @type {import('@remix-run/dev').AppConfig} */
+
+module.exports = {
+  // appDirectory: "app",
+  // assetsBuildDirectory: "public/build",
+  // publicPath: "/build/",
+  // serverBuildDirectory: "build",
+  // devServerPort: 8002,
+  ignoredRouteFiles: ["**/.*"],
+  serverDependenciesToBundle: [
+    /^rehype.*/,
+    /^remark.*/,
+    /^hast-.*/,
+    /^mdast-util.*/,
+    /^unist-.*/,
+    /^unified.*/,
+    /^micromark.*/,
+    "vfile",
+    "vfile-message",
+    "bail",
+    "property-information",
+    "trough",
+    "space-separated-tokens",
+    "comma-separated-tokens",
+    "web-namespaces",
+    "character-entities",
+    "decode-named-character-reference",
+    "ccount",
+    "markdown-table",
+  ],
+};

@@ -1,0 +1,15 @@
+node_modules
+/.gitlab
+/.husky
+/deploy
+/.npm
+/.eslintcache
+/.eslintignore
+/.gitignore
+/.gitlab-ci.yml
+/Dockerfile
+/README.md
+/public
+!/public/favicon.ico
+/.cache
+

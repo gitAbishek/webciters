@@ -1,0 +1,2 @@
+- What happens when a service on a product is free? Will it show "Gratis", "0,00" or no price or text displayed?
+- What happens if there are no product images and the client wants to upload a product without an image? What will happen with the slider component?

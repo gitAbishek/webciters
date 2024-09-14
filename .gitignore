@@ -1,0 +1,9 @@
+node_modules
+
+/.idea
+/.cache
+/build
+/public/build
+.eslintcache
+npm-debug.log
+/.husky

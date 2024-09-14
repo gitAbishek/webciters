@@ -1,0 +1,44 @@
+# fly.toml file generated for outlet-duiven-acc on 2022-02-08T10:22:39+01:00
+
+app = "outlet-duiven-prod"
+
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[env]
+  PORT = "8080"
+  WEBSITE_URL = "outletduiven.nl"
+  NOVULO_REST_API = "https://vds78.novulo.com/outletduivenprod/rest"
+  GTM_ID = "GTM-M8JRXVVQ"
+  CLIENT_IP_HEADER_KEY = "fly-client-ip"
+
+[experimental]
+  allowed_public_ports = []
+  auto_rollback = true
+
+[[services]]
+  http_checks = []
+  internal_port = 8080
+  processes = ["app"]
+  protocol = "tcp"
+  script_checks = []
+
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+    type = "connections"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "1s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"

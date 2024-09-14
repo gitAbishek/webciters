@@ -1,0 +1,97 @@
+include:
+  - project: 'dependabot-gitlab/dependabot-standalone'
+    file: '.gitlab-ci.yml'
+
+stages:
+  - test
+  - deploy
+  - release
+
+.node_env:
+  image: node:16-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+
+  before_script:
+    - npm ci --cache .npm --prefer-offline --unsafe-perm
+
+.git_env:
+  image: node:14-alpine
+  before_script:
+    - apk update -qq && apk add git git-lfs
+    - project_url=$(echo $CI_PROJECT_URL | sed 's/https:\/\///')
+    - git remote set-url origin https://oauth2:$GITLAB_RUNNER_TOKEN@$project_url
+    - git config --global user.email "gitlab@adapptive.nl"
+    - git config --global user.name "Gitlab runner"
+
+.deploy_env:
+  extends: .node_env
+  before_script:
+    - apk update -qq && apk add curl
+    - curl -L https://fly.io/install.sh | sh
+    - export FLYCTL_INSTALL="/root/.fly"
+    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
+
+test:
+  extends: .node_env
+  stage: test
+  script:
+    - npm test
+  only:
+    - merge_requests
+    - main
+  except:
+    - tags
+
+deploy-acc:
+  extends: .deploy_env
+  stage: deploy
+  needs:
+    - test
+  script:
+    - fly deploy --config ./deploy/fly.acc.toml
+  only:
+    - main
+  except:
+    - tags
+
+deploy-preprod:
+  extends: .deploy_env
+  stage: deploy
+  script:
+    - fly deploy --config ./deploy/fly.preprod.toml
+  only:
+    - /^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$/
+
+deploy-prod:
+  extends: .deploy_env
+  stage: deploy
+  when: manual
+  needs:
+    - deploy-preprod
+  script:
+    - fly deploy --config ./deploy/fly.prod.toml
+  only:
+    - /^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$/
+
+make_release_version:
+  extends: .git_env
+  stage: release
+  when: manual
+  needs:
+    - test
+    - deploy-acc
+  script:
+    - echo "Tag this commit and add to npm"
+    - git checkout $CI_COMMIT_REF_NAME
+    - npm version minor
+    - git push
+    - git push --tags
+  only:
+    - main
+  except:
+    - tags
